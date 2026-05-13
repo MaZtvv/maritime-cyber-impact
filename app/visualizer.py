@@ -9,10 +9,10 @@ import networkx as nx
 # ---------------------------------------------------------------------------
 
 SEVERITY_COLORS = {
-    "Low":         "#059669",  # operational green
-    "Moderate":    "#2563EB",  # institutional blue
-    "Significant": "#B45309",  # amber
-    "High":        "#DC6803",  # orange
+    "Low":         "#0F8A5F",  # operational green
+    "Moderate":    "#1D5F9F",  # institutional blue
+    "Significant": "#A97913",  # restrained gold
+    "High":        "#D65F00",  # operational orange
     "Critical":    "#C6002B",  # French red
 }
 
@@ -25,12 +25,12 @@ SEVERITY_BG_COLORS = {
     "Critical":    "rgba(198,0,43,0.12)",
 }
 
-_NAVY_BG   = "#EEF0F4"  # page background (light grey)
+_NAVY_BG   = "#F1F3F7"  # page background
 _CARD_BG   = "#FFFFFF"  # chart / card surfaces
-_BORDER    = "#D4D9E1"  # borders
-_TEXT_PRI  = "#1A1F2E"  # primary text
-_TEXT_SEC  = "#4B5563"  # secondary text
-_GRID      = "#E5E7EB"  # chart grid lines
+_BORDER    = "#D8DEE8"  # borders
+_TEXT_PRI  = "#111827"  # primary text
+_TEXT_SEC  = "#667085"  # secondary text
+_GRID      = "rgba(0,38,84,0.10)"  # chart grid lines
 _STEEL     = "#002654"  # navy accent
 
 
@@ -67,7 +67,7 @@ def plot_process_bar(process_df: pd.DataFrame) -> go.Figure:
         ),
         text=df["impact_score"].apply(lambda x: f"{x:.0f}"),
         textposition="outside",
-        textfont=dict(size=9, color=_TEXT_SEC, family="monospace"),
+        textfont=dict(size=10, color=_TEXT_SEC, family="IBM Plex Mono, monospace"),
         hovertemplate=(
             "<b>%{y}</b><br>"
             "Score : %{x:.1f}/100<br>"
@@ -80,7 +80,7 @@ def plot_process_bar(process_df: pd.DataFrame) -> go.Figure:
         xaxis=dict(
             title="",
             range=[0, 112],
-            tickfont=dict(size=9, color=_TEXT_SEC, family="monospace"),
+            tickfont=dict(size=9, color=_TEXT_SEC, family="IBM Plex Mono, monospace"),
             gridcolor=_GRID,
             zeroline=False,
         ),
@@ -131,7 +131,7 @@ def plot_propagation_graph(
     edge_trace = go.Scatter(
         x=edge_x, y=edge_y,
         mode="lines",
-        line=dict(width=0.6, color="#1e2d42"),
+        line=dict(width=0.8, color="rgba(0,38,84,0.24)"),
         hoverinfo="none",
     )
 
@@ -159,14 +159,14 @@ def plot_propagation_graph(
         mode="markers+text",
         text=node_text,
         textposition="top center",
-        textfont=dict(size=6, color=_TEXT_SEC, family="monospace"),
+        textfont=dict(size=6, color=_TEXT_SEC, family="IBM Plex Mono, monospace"),
         hovertext=node_hover,
         hoverinfo="text",
         marker=dict(
             size=node_size,
             color=node_color,
             colorscale=[
-                [0.0,  "#E5E7EB"],
+                [0.0,  "#E7ECF3"],
                 [0.2,  SEVERITY_COLORS["Low"]],
                 [0.4,  SEVERITY_COLORS["Significant"]],
                 [0.7,  SEVERITY_COLORS["High"]],
@@ -182,7 +182,7 @@ def plot_propagation_graph(
                 bordercolor=_BORDER,
                 borderwidth=1,
             ),
-            line=dict(width=0.5, color=_BORDER),
+            line=dict(width=0.7, color="#FFFFFF"),
         ),
     )
 
@@ -285,10 +285,10 @@ def plot_geo_map(geo_df: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         **_base_layout(height=380),
         geo=dict(
-            showland=True,      landcolor="#F3F4F6",
-            showocean=True,     oceancolor="#DBEAFE",
-            showcountries=True, countrycolor="#D4D9E1",
-            showcoastlines=True, coastlinecolor="#CBD5E1",
+            showland=True,      landcolor="#ECEFF4",
+            showocean=True,     oceancolor="#DCE8F7",
+            showcountries=True, countrycolor="#B8C2D2",
+            showcoastlines=True, coastlinecolor="#AAB6C8",
             showframe=False,
             projection_type="natural earth",
             bgcolor=_CARD_BG,
@@ -322,7 +322,7 @@ def plot_batch_priority(ranked_df: pd.DataFrame) -> go.Figure:
         marker=dict(color=colors, line=dict(width=0)),
         text=df["global_impact"].apply(lambda x: f"{x:.0f}"),
         textposition="outside",
-        textfont=dict(size=9, color=_TEXT_SEC, family="monospace"),
+        textfont=dict(size=10, color=_TEXT_SEC, family="IBM Plex Mono, monospace"),
         hovertemplate=(
             "<b>%{y}</b><br>"
             "Impact : %{x:.1f}/100<br>"
@@ -335,10 +335,10 @@ def plot_batch_priority(ranked_df: pd.DataFrame) -> go.Figure:
         **_base_layout(height=max(280, len(df) * 38)),
         xaxis=dict(
             title="", range=[0, 112],
-            tickfont=dict(size=9, color=_TEXT_SEC, family="monospace"),
+            tickfont=dict(size=9, color=_TEXT_SEC, family="IBM Plex Mono, monospace"),
             gridcolor=_GRID, zeroline=False,
         ),
-        yaxis=dict(title="", tickfont=dict(size=9, color=_TEXT_PRI, family="monospace")),
+        yaxis=dict(title="", tickfont=dict(size=9, color=_TEXT_PRI, family="IBM Plex Mono, monospace")),
         margin=dict(l=4, r=50, t=8, b=8),
     )
     return fig
@@ -355,9 +355,10 @@ def severity_badge_html(label: str, small: bool = False) -> str:
     return (
         f'<span style="'
         f'background:{color};color:#FFFFFF;'
-        f'padding:2px 8px;letter-spacing:0.07em;'
-        f'font-size:{size};font-weight:700;'
-        f'text-transform:uppercase;">'
+        f'padding:3px 9px;letter-spacing:0.08em;'
+        f'font-size:{size};font-weight:800;'
+        f'text-transform:uppercase;border-radius:2px;'
+        f'box-shadow:0 1px 0 rgba(0,0,0,0.12);">'
         f'{label.upper()}'
         f'</span>'
     )
@@ -374,7 +375,12 @@ def _base_layout(height: int = 400) -> dict:
         hovermode="closest",
         plot_bgcolor=_CARD_BG,
         paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="'Courier New', monospace", color=_TEXT_SEC, size=10),
+        font=dict(family="Inter, sans-serif", color=_TEXT_SEC, size=10),
+        hoverlabel=dict(
+            bgcolor="#FFFFFF",
+            bordercolor=_BORDER,
+            font=dict(color=_TEXT_PRI, size=11),
+        ),
     )
 
 
