@@ -65,6 +65,14 @@ def run_analysis(event_row: pd.Series, data: dict) -> AnalysisResult:
     linked_attacks = attacks_df[attacks_df["id"].isin(all_attack_ids)]
     max_cvss = float(linked_attacks["cvss_score"].max()) if len(linked_attacks) else 5.0
 
+    # Honour explicit CVSS overrides from uploaded/synthetic events
+    cvss_override = event_row.get("cvss_override", "")
+    if cvss_override and str(cvss_override).strip():
+        try:
+            max_cvss = max(max_cvss, float(str(cvss_override).strip()))
+        except ValueError:
+            pass
+
     event_base = compute_event_base_score(
         event_type=str(event_row.get("type", "Incident")),
         description=str(event_row.get("description", "")),
@@ -122,13 +130,21 @@ def run_analysis(event_row: pd.Series, data: dict) -> AnalysisResult:
             "location": info.get("location", ""),
             "processes": info.get("processes", ""),
         })
-    assets_df_out = pd.DataFrame(asset_rows).sort_values("impact", ascending=False)
+    _ASSET_COLS = ["asset_id", "name", "type", "criticality", "impact", "hop", "location", "processes"]
+    assets_df_out = (
+        pd.DataFrame(asset_rows, columns=_ASSET_COLS).sort_values("impact", ascending=False)
+        if asset_rows else pd.DataFrame(columns=_ASSET_COLS)
+    )
 
     # ------------------------------------------------------------------ #
     # 5. Process impact aggregation
     # ------------------------------------------------------------------ #
     process_rows = _compute_process_impacts(all_impacts, asset_index)
-    process_df = pd.DataFrame(process_rows).sort_values("impact_score", ascending=False)
+    _PROC_COLS = ["process", "impact_score", "severity", "asset_count", "process_criticality", "exposure_score"]
+    process_df = (
+        pd.DataFrame(process_rows, columns=_PROC_COLS).sort_values("impact_score", ascending=False)
+        if process_rows else pd.DataFrame(columns=_PROC_COLS)
+    )
 
     # ------------------------------------------------------------------ #
     # 6. Global score
